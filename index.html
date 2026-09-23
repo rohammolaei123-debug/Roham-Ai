@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -15,10 +16,9 @@
   --panel:#fffdf9;
   --bubble-user:#e7ded0;
   --bubble-ai:#ffffff;
-  --danger:#8a3324;
 }
 
-*{box-sizing:border-box;}
+*{box-sizing:border-box}
 
 html,body{
   margin:0;
@@ -109,7 +109,6 @@ main{
   align-self:center;
   color:#8a8371;
   font-size:.82rem;
-  background:none;
 }
 
 .chat-input-row{
@@ -137,91 +136,90 @@ main{
   outline-offset:1px;
 }
 
-button.send{
+button{
   font-family:inherit;
+  cursor:pointer;
+}
+
+.send{
   font-size:1rem;
-  padding:12px 24px;
+  padding:0 24px;
+  min-height:48px;
   background:var(--ink);
   color:var(--paper);
   border:none;
-  cursor:pointer;
-  min-height:48px;
 }
 
-button.send:hover:not(:disabled){
+.send:hover:not(:disabled){
   background:var(--brass-deep);
 }
 
-button.send:disabled{
+.send:disabled{
   background:#cfc7b8;
   color:#7a7365;
   cursor:not-allowed;
 }
 
-.image-upload{
+.upload-label{
   display:flex;
-  flex-direction:column;
   align-items:center;
-  gap:5px;
+  justify-content:center;
+  min-height:48px;
+  padding:0 15px;
+  border:1px solid var(--ink);
+  background:transparent;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.upload-label:hover{
+  background:var(--ink);
+  color:var(--paper);
 }
 
 #imageInput{
   display:none;
 }
 
-.upload-btn{
-  font-family:inherit;
-  font-size:.9rem;
-  padding:12px 16px;
-  background:transparent;
-  color:var(--ink);
-  border:1px solid var(--ink);
-  cursor:pointer;
-  min-height:48px;
-}
-
-.upload-btn:hover{
-  background:var(--ink);
-  color:var(--paper);
-}
-
-.preview{
+.image-preview{
   display:none;
   position:absolute;
-  bottom:85px;
+  bottom:80px;
   right:20px;
+  width:150px;
+  padding:8px;
   background:var(--panel);
   border:1px solid var(--line);
-  padding:8px;
-  max-width:150px;
 }
 
-.preview img{
-  width:130px;
+.image-preview img{
+  width:100%;
   max-height:130px;
   object-fit:contain;
   display:block;
 }
 
-.preview-text{
-  font-size:.75rem;
-  margin-top:5px;
-  color:#6b6455;
-  text-align:center;
+.image-preview button{
+  width:100%;
+  margin-top:6px;
+  padding:5px;
+  border:1px solid var(--line);
+  background:transparent;
 }
 
 @media(max-width:600px){
+
   .chat-input-row{
     padding:10px;
     gap:6px;
   }
 
-  button.send{
-    padding:12px 15px;
+  .send{
+    padding:0 15px;
   }
 
-  .upload-btn{
-    padding:12px 10px;
+  .upload-label{
+    padding:0 10px;
   }
 
   #messages{
@@ -246,44 +244,43 @@ button.send:disabled{
 
 <main>
 
-  <div id="chatTab">
+<div id="chatTab">
 
-    <div id="messages">
-      <div class="msg sys">
-        با رهام چت کن. می‌توانی عکس هم برای رهام بفرستی تا درباره آن صحبت کند.
-      </div>
+  <div id="messages">
+    <div class="msg sys">
+      با رهام چت کن. می‌توانی عکس هم برای رهام بفرستی.
     </div>
+  </div>
 
-    <div class="preview" id="preview">
-      <img id="previewImg" src="" alt="پیش‌نمایش">
-      <div class="preview-text">عکس انتخاب شده</div>
-    </div>
+  <div class="image-preview" id="imagePreview">
+    <img id="previewImg" alt="پیش‌نمایش عکس">
+    <button id="removeImage">حذف عکس</button>
+  </div>
 
-    <div class="chat-input-row">
+  <div class="chat-input-row">
 
-      <div class="image-upload">
-        <label for="imageInput" class="upload-btn">
-          ارسال عکس
-        </label>
-        <input
-          id="imageInput"
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-        >
-      </div>
+    <label class="upload-label" for="imageInput">
+      ارسال عکس
+    </label>
 
-      <textarea
-        id="chatInput"
-        placeholder="پیامت را بنویس..."
-      ></textarea>
+    <input
+      id="imageInput"
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+    >
 
-      <button class="send" id="sendBtn">
-        ارسال
-      </button>
+    <textarea
+      id="chatInput"
+      placeholder="پیامت را بنویس..."
+    ></textarea>
 
-    </div>
+    <button class="send" id="sendBtn">
+      ارسال
+    </button>
 
   </div>
+
+</div>
 
 </main>
 
@@ -297,108 +294,125 @@ var chatInput = document.getElementById("chatInput");
 var sendBtn = document.getElementById("sendBtn");
 
 var imageInput = document.getElementById("imageInput");
-var preview = document.getElementById("preview");
+var imagePreview = document.getElementById("imagePreview");
 var previewImg = document.getElementById("previewImg");
+var removeImage = document.getElementById("removeImage");
 
 var selectedImage = null;
 
+
+/* =========================
+   هویت رهام
+========================= */
+
+var creatorAnswer = "من رو رهام مولایی ساخته.";
+
+
+/* =========================
+   تاریخچه گفتگو
+========================= */
+
 var history = [
+
   {
     role:"system",
     content:
-    "تو رهام هستی، یک دستیار هوش مصنوعی فارسی‌زبان، دوستانه و مفید. " +
-    "همیشه به فارسی پاسخ بده مگر کاربر زبان دیگری بخواهد. " +
-    "اگر کاربر درباره سازنده، خالق یا کسی که تو را ساخته پرسید، " +
-    "پاسخ بده: من رو رهام مولایی ساخته. " +
-    "تو قابلیت ساخت یا تولید تصویر نداری و فقط می‌توانی تصاویر ارسال‌شده توسط کاربر را تحلیل و درباره آن‌ها صحبت کنی."
+    "تو «رهام» هستی، یک دستیار هوش مصنوعی فارسی‌زبان. " +
+    "همیشه تا جای ممکن فارسی و دوستانه پاسخ بده. " +
+    "نام تو رهام است. " +
+    "اگر درباره سازنده یا خالق تو سؤال شد، بگو: «من رو رهام مولایی ساخته.» " +
+    "هرگز در پاسخ به سؤال درباره سازنده خودت، نام OpenAI، ChatGPT یا شرکت دیگری را به عنوان سازنده خودت معرفی نکن. " +
+    "تو قابلیت ساخت یا تولید تصویر نداری. " +
+    "اگر کاربر از تو خواست تصویر بسازی، بگو قابلیت ساخت تصویر نداری. " +
+    "اگر کاربر یک تصویر ارسال کرد، در صورت پشتیبانی سرویس، تصویر را تحلیل کن و درباره آن پاسخ بده."
   }
+
 ];
 
-function addBubble(text, cls){
 
-  var d = document.createElement("div");
+/* =========================
+   نمایش پیام
+========================= */
 
-  d.className = "msg " + cls;
+function addBubble(text, type){
 
-  d.textContent = text;
+  var div = document.createElement("div");
 
-  messagesEl.appendChild(d);
+  div.className = "msg " + type;
+
+  div.textContent = text;
+
+  messagesEl.appendChild(div);
 
   messagesEl.scrollTop = messagesEl.scrollHeight;
 
-  return d;
+  return div;
 }
 
 
-/* انتخاب عکس */
+/* =========================
+   تشخیص سؤال سازنده
+========================= */
 
-imageInput.addEventListener("change", function(){
+function normalize(text){
 
-  var file = imageInput.files[0];
-
-  if(!file){
-    selectedImage = null;
-    preview.style.display = "none";
-    return;
-  }
-
-  if(!file.type.startsWith("image/")){
-    addBubble("لطفاً فقط یک فایل تصویری انتخاب کن.", "sys");
-    imageInput.value = "";
-    return;
-  }
-
-  var reader = new FileReader();
-
-  reader.onload = function(e){
-
-    selectedImage = e.target.result;
-
-    previewImg.src = selectedImage;
-
-    preview.style.display = "block";
-
-  };
-
-  reader.readAsDataURL(file);
-
-});
-
-
-/* تشخیص سؤال درباره سازنده */
-
-function isCreatorQuestion(text){
-
-  var t = text
+  return text
     .replace(/ي/g,"ی")
     .replace(/ك/g,"ک")
+    .replace(/ۀ/g,"ه")
+    .replace(/‌/g," ")
+    .replace(/\s+/g," ")
     .trim()
     .toLowerCase();
 
-  var questions = [
+}
+
+
+function isCreatorQuestion(text){
+
+  var t = normalize(text);
+
+  var patterns = [
+
     "کی تورو ساخته",
     "کی تو رو ساخته",
+    "کی تو را ساخته",
+    "کی تورو ساخت",
+    "کی تو رو ساخت",
+    "کی تو را ساخت",
+
     "چه کسی تورو ساخته",
     "چه کسی تو رو ساخته",
+    "چه کسی تو را ساخته",
+
+    "چه کسی تورو ساخت",
+    "چه کسی تو رو ساخت",
+    "چه کسی تو را ساخت",
+
     "سازندت کیه",
-    "سازنده‌ت کیه",
+    "سازنده ت کیه",
     "سازنده ات کیه",
     "سازنده تو کیه",
+
     "خالق تو کیه",
-    "چه کسی ساختت",
-    "کی ساختت",
+    "خالق ت کیه",
+
     "تو رو کی ساخته",
     "تورو کی ساخته",
-    "تو را چه کسی ساخته",
     "تو را کی ساخته",
-    "چه کسی تو را ساخته",
-    "کی تو را ساخته",
-    "مالک تو کیه"
+
+    "چه کسی ساختت",
+    "کی ساختت",
+
+    "چه کسی تو را ساخته است",
+    "چه کسی تو رو ساخته است",
+    "چه کسی تورو ساخته است"
+
   ];
 
-  for(var i=0;i<questions.length;i++){
+  for(var i=0;i<patterns.length;i++){
 
-    if(t.includes(questions[i])){
+    if(t.indexOf(patterns[i]) !== -1){
       return true;
     }
 
@@ -408,18 +422,148 @@ function isCreatorQuestion(text){
 }
 
 
-/* ارسال پیام */
+/* =========================
+   تشخیص سؤال هویت
+========================= */
+
+function isIdentityQuestion(text){
+
+  var t = normalize(text);
+
+  var patterns = [
+
+    "تو چی هستی",
+    "تو چیه",
+    "تو کی هستی",
+    "کی هستی",
+    "خودتو معرفی کن",
+    "خودت رو معرفی کن",
+    "اسمت چیه",
+    "نامت چیه",
+    "اسم تو چیه",
+
+    "چت جی پی تی هستی",
+    "chatgpt هستی",
+    "chat gpt هستی",
+
+    "اوپن ای آی هستی",
+    "openai هستی",
+
+    "تو chatgpt ای",
+    "تو openai ای"
+
+  ];
+
+  for(var i=0;i<patterns.length;i++){
+
+    if(t.indexOf(patterns[i]) !== -1){
+      return true;
+    }
+
+  }
+
+  return false;
+}
+
+
+/* =========================
+   پاسخ هویت
+========================= */
+
+function identityAnswer(text){
+
+  var t = normalize(text);
+
+  if(
+    t.indexOf("چت جی پی تی") !== -1 ||
+    t.indexOf("chatgpt") !== -1 ||
+    t.indexOf("chat gpt") !== -1 ||
+    t.indexOf("openai") !== -1 ||
+    t.indexOf("اوپن ای آی") !== -1
+  ){
+
+    return "من رهام هستم، یک دستیار هوش مصنوعی. من رو رهام مولایی ساخته.";
+
+  }
+
+  return "من رهام هستم، یک دستیار هوش مصنوعی فارسی‌زبان.";
+}
+
+
+/* =========================
+   انتخاب عکس
+========================= */
+
+imageInput.addEventListener("change",function(){
+
+  var file = imageInput.files[0];
+
+  if(!file){
+    return;
+  }
+
+  if(!file.type.startsWith("image/")){
+
+    addBubble(
+      "لطفاً یک فایل تصویری انتخاب کن.",
+      "sys"
+    );
+
+    imageInput.value = "";
+
+    return;
+  }
+
+
+  var reader = new FileReader();
+
+  reader.onload = function(e){
+
+    selectedImage = e.target.result;
+
+    previewImg.src = selectedImage;
+
+    imagePreview.style.display = "block";
+
+  };
+
+  reader.readAsDataURL(file);
+
+});
+
+
+/* =========================
+   حذف عکس
+========================= */
+
+removeImage.addEventListener("click",function(){
+
+  selectedImage = null;
+
+  imageInput.value = "";
+
+  previewImg.src = "";
+
+  imagePreview.style.display = "none";
+
+});
+
+
+/* =========================
+   ارسال پیام
+========================= */
 
 function sendMessage(){
 
   var text = chatInput.value.trim();
+
 
   if(!text && !selectedImage){
     return;
   }
 
 
-  /* پاسخ مستقیم درباره سازنده */
+  /* سؤال سازنده */
 
   if(text && isCreatorQuestion(text) && !selectedImage){
 
@@ -430,17 +574,38 @@ function sendMessage(){
     setTimeout(function(){
 
       addBubble(
-        "من رو رهام مولایی ساخته.",
+        creatorAnswer,
         "ai"
       );
 
-    },200);
+    },150);
 
     return;
   }
 
 
-  /* پیام کاربر */
+  /* سؤال هویت */
+
+  if(text && isIdentityQuestion(text) && !selectedImage){
+
+    addBubble(text,"user");
+
+    chatInput.value = "";
+
+    setTimeout(function(){
+
+      addBubble(
+        identityAnswer(text),
+        "ai"
+      );
+
+    },150);
+
+    return;
+  }
+
+
+  /* نمایش پیام */
 
   if(text){
 
@@ -448,50 +613,65 @@ function sendMessage(){
 
   }else{
 
-    addBubble("این عکس رو بررسی کن.", "user");
+    addBubble(
+      "این عکس را بررسی کن.",
+      "user"
+    );
 
   }
 
 
   sendBtn.disabled = true;
 
+
   var thinking = addBubble(
-    "رهام در حال بررسی است...",
+    selectedImage
+      ? "رهام در حال بررسی عکس است..."
+      : "رهام در حال نوشتن پاسخ است...",
     "sys"
   );
 
 
-  /*
-    اگر عکس انتخاب شده باشد،
-    پیام به شکل multimodal ارسال می‌شود.
-  */
-
   var userMessage;
 
+
+  /* پیام دارای عکس */
 
   if(selectedImage){
 
     userMessage = {
+
       role:"user",
+
       content:[
+
         {
           type:"text",
-          text:text || "این عکس را بررسی کن و درباره آن توضیح بده."
+          text:
+            text ||
+            "این تصویر را بررسی کن و توضیح بده چه چیزی در آن می‌بینی."
         },
+
         {
           type:"image_url",
           image_url:{
             url:selectedImage
           }
         }
+
       ]
+
     };
+
 
   }else{
 
     userMessage = {
+
       role:"user",
+
       content:text
+
     };
 
   }
@@ -500,41 +680,51 @@ function sendMessage(){
   history.push(userMessage);
 
 
-  fetch("https://text.pollinations.ai/openai/chat/completions",{
+  /* =========================
+     درخواست به سرویس
+  ========================= */
 
-    method:"POST",
+  fetch(
+    "https://text.pollinations.ai/openai/chat/completions",
+    {
+      method:"POST",
 
-    headers:{
-      "Content-Type":"application/json"
-    },
+      headers:{
+        "Content-Type":"application/json"
+      },
 
-    body:JSON.stringify({
+      body:JSON.stringify({
 
-      model:"openai",
+        model:"openai",
 
-      messages:history,
+        messages:history,
 
-      temperature:0.7
+        temperature:0.7
 
-    })
+      })
 
-  })
+    }
+  )
 
-  .then(function(res){
+  .then(function(response){
 
-    if(!res.ok){
+    if(!response.ok){
 
-      throw new Error("HTTP " + res.status);
+      throw new Error(
+        "HTTP " + response.status
+      );
 
     }
 
-    return res.json();
+    return response.json();
 
   })
+
 
   .then(function(data){
 
     thinking.remove();
+
 
     var reply =
       data &&
@@ -546,26 +736,25 @@ function sendMessage(){
 
     if(!reply){
 
-      throw new Error("پاسخ خالی بود");
+      throw new Error(
+        "پاسخ خالی بود"
+      );
 
     }
 
 
-    /*
-      اگر پاسخ مدل آرایه باشد،
-      متن آن استخراج می‌شود.
-    */
+    /* اگر مدل آرایه برگرداند */
 
     if(Array.isArray(reply)){
 
-      reply = reply.map(function(part){
+      reply = reply.map(function(item){
 
-        if(typeof part === "string"){
-          return part;
+        if(typeof item === "string"){
+          return item;
         }
 
-        if(part && part.text){
-          return part.text;
+        if(item && item.text){
+          return item.text;
         }
 
         return "";
@@ -575,34 +764,63 @@ function sendMessage(){
     }
 
 
-    addBubble(reply,"ai");
+    /*
+      محافظ هویت:
+      اگر مدل اشتباهاً درباره سازنده
+      چیز دیگری گفت، پاسخ را اصلاح می‌کنیم.
+    */
+
+    if(
+      text &&
+      isCreatorQuestion(text)
+    ){
+
+      reply = creatorAnswer;
+
+    }
+
+
+    addBubble(
+      reply,
+      "ai"
+    );
+
 
     history.push({
+
       role:"assistant",
+
       content:reply
+
     });
 
   })
 
-  .catch(function(err){
+
+  .catch(function(error){
 
     thinking.remove();
 
+
     addBubble(
+
       "اتصال به سرویس هوش مصنوعی برقرار نشد (" +
-      err.message +
+      error.message +
       "). کمی بعد دوباره امتحان کن.",
+
       "sys"
+
     );
 
+
     /*
-      اگر درخواست ناموفق بود،
-      پیام آخر از history حذف شود.
+      پیام ناموفق از تاریخچه حذف شود
     */
 
     history.pop();
 
   })
+
 
   .finally(function(){
 
@@ -617,12 +835,16 @@ function sendMessage(){
 
   imageInput.value = "";
 
-  preview.style.display = "none";
+  previewImg.src = "";
+
+  imagePreview.style.display = "none";
 
 }
 
 
-/* دکمه ارسال */
+/* =========================
+   دکمه ارسال
+========================= */
 
 sendBtn.addEventListener(
   "click",
@@ -630,13 +852,18 @@ sendBtn.addEventListener(
 );
 
 
-/* Enter برای ارسال */
+/* =========================
+   Enter
+========================= */
 
 chatInput.addEventListener(
   "keydown",
   function(e){
 
-    if(e.key === "Enter" && !e.shiftKey){
+    if(
+      e.key === "Enter" &&
+      !e.shiftKey
+    ){
 
       e.preventDefault();
 
@@ -652,3 +879,4 @@ chatInput.addEventListener(
 
 </body>
 </html>
+```
