@@ -1,381 +1,165 @@
-```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roham AI</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
-    margin:0;
-    background:#000;
-    color:#fff;
-    font-family:Tahoma,Arial,sans-serif;
-}
-
-.app{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
+margin:0;
+background:#000;
+color:#fff;
+font-family:Arial,sans-serif;
+height:100vh;
+display:flex;
+flex-direction:column
 }
 
 header{
-    height:60px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-bottom:1px solid #222;
-    font-size:21px;
-    font-weight:bold;
+padding:18px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+border-bottom:1px solid #222
 }
 
-#messages{
-    flex:1;
-    overflow-y:auto;
-    padding:20px 12px;
+#chat{
+flex:1;
+overflow-y:auto;
+padding:20px
 }
 
-.message{
-    max-width:850px;
-    margin:0 auto 20px;
-    line-height:1.9;
-    white-space:pre-wrap;
+.msg{
+max-width:800px;
+margin:0 auto 20px;
+line-height:2;
+white-space:pre-wrap
 }
 
-.user{
-    background:#181818;
-    padding:12px 15px;
-    border-radius:15px;
-    width:max-content;
-    max-width:85%;
-    margin-right:0;
-    margin-left:auto;
-}
+.user{color:#888}
+.ai{color:#fff}
 
-.ai{
-    color:#fff;
-}
-
-.inputArea{
-    padding:12px;
-    border-top:1px solid #222;
-}
-
-.inputBox{
-    max-width:850px;
-    margin:auto;
-    display:flex;
-    gap:8px;
+.bottom{
+display:flex;
+gap:10px;
+padding:15px;
+border-top:1px solid #222
 }
 
 textarea{
-    flex:1;
-    resize:none;
-    min-height:50px;
-    max-height:140px;
-    background:#111;
-    color:#fff;
-    border:1px solid #333;
-    border-radius:14px;
-    padding:13px;
-    font-family:inherit;
-    outline:none;
+flex:1;
+background:#111;
+color:white;
+border:1px solid #333;
+border-radius:12px;
+padding:14px;
+font-size:16px;
+resize:none;
+outline:none
 }
 
 button{
-    width:55px;
-    border:0;
-    border-radius:14px;
-    background:#fff;
-    color:#000;
-    cursor:pointer;
-    font-size:18px;
-}
-
-button:disabled{
-    opacity:.5;
+background:white;
+color:black;
+border:0;
+border-radius:12px;
+padding:0 22px;
+font-size:16px
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
-
 <header>Roham AI</header>
 
-<div id="messages"></div>
+<div id="chat"></div>
 
-<div class="inputArea">
-<div class="inputBox">
-
-<textarea
-id="input"
-placeholder="سؤالت را بنویس..."
-></textarea>
-
-<button id="send">➤</button>
-
-</div>
-</div>
-
+<div class="bottom">
+<textarea id="input" rows="2" placeholder="سؤالت را بنویس..."></textarea>
+<button onclick="send()">ارسال</button>
 </div>
 
 <script>
 
-/*
-=================================================
-کلید API را اینجا قرار بده
-=================================================
-*/
+const input=document.getElementById("input");
+const chat=document.getElementById("chat");
 
-const API_KEY = "کلید_API_خودت_را_اینجا_بگذار";
-
-
-/*
-مدل
-*/
-
-const MODEL = "gpt-5.6-luna";
-
-
-const input =
-document.getElementById("input");
-
-const send =
-document.getElementById("send");
-
-const messages =
-document.getElementById("messages");
-
-
-/*
-افزودن پیام
-*/
-
-function addMessage(text, type){
-
-    const div =
-    document.createElement("div");
-
-    div.className =
-    "message " + type;
-
-    div.textContent =
-    text;
-
-    messages.appendChild(div);
-
-    messages.scrollTop =
-    messages.scrollHeight;
+function add(text,type){
+let d=document.createElement("div");
+d.className="msg "+type;
+d.textContent=text;
+chat.appendChild(d);
+chat.scrollTop=chat.scrollHeight;
 }
 
+function answer(q){
 
-/*
-پاسخ رهام
-*/
+q=q.trim();
 
-async function askRoham(question){
+let x=q.replace(/[؟?!.,،]/g,"").toLowerCase();
 
-    /*
-    اگر درباره سازنده پرسیده شد،
-    پاسخ ثابت داده می‌شود.
-    */
-
-    const q =
-    question
-    .toLowerCase()
-    .replaceAll("ي","ی")
-    .replaceAll("ك","ک");
-
-    if(
-        q.includes("کی تورو ساخته") ||
-        q.includes("چه کسی تورو ساخته") ||
-        q.includes("چه کسی تو را ساخته") ||
-        q.includes("سازنده تو کیه") ||
-        q.includes("سازنده‌ات کیه") ||
-        q.includes("خالق تو کیه")
-    ){
-
-        return "رهام مولایی فر ساخته";
-
-    }
-
-
-    /*
-    درخواست واقعی به API
-    */
-
-    const response =
-    await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-            method:"POST",
-
-            headers:{
-                "Content-Type":
-                "application/json",
-
-                "Authorization":
-                "Bearer " + API_KEY
-            },
-
-            body:JSON.stringify({
-
-                model:MODEL,
-
-                instructions:
-                "تو رهام هستی. فقط خود جواب سؤال را بده. هیچ مقدمه، عنوان، توضیح اضافه یا عبارت‌هایی مثل «پاسخ رهام» اضافه نکن.",
-
-                input:question
-
-            })
-        }
-    );
-
-
-    if(!response.ok){
-
-        throw new Error(
-            "خطا در اتصال به هوش مصنوعی"
-        );
-
-    }
-
-
-    const data =
-    await response.json();
-
-
-    /*
-    خروجی متن
-    */
-
-    if(data.output_text){
-
-        return data.output_text.trim();
-
-    }
-
-
-    return "پاسخی دریافت نشد.";
-
+if(
+x.includes("کی تورو ساخته") ||
+x.includes("چه کسی تو را ساخته") ||
+x.includes("چه کسی تورو ساخته") ||
+x.includes("سازنده تو کیه") ||
+x.includes("سازندت کیه") ||
+x.includes("تو رو کی ساخته") ||
+x.includes("تورو کی ساخته")
+){
+return "رهام مولایی فر ساخته";
 }
 
+if(x.includes("سلام"))
+return "سلام! چطور می‌تونم کمکت کنم؟";
 
-/*
-ارسال
-*/
+if(x.includes("اسمت چیه") || x.includes("نامت چیه"))
+return "من Roham AI هستم.";
 
-async function sendMessage(){
+if(x.includes("رهام کیه"))
+return "رهام مولایی فر سازنده من است.";
 
-    const question =
-    input.value.trim();
+if(x.includes("امروز چند شنبه"))
+return "برای گفتن روز دقیق، تاریخ دستگاه شما را بررسی کنید.";
 
-    if(!question)
-    return;
+if(x.includes("ممنون") || x.includes("مرسی"))
+return "خواهش می‌کنم.";
 
-    addMessage(
-        question,
-        "user"
-    );
+if(x.includes("خداحافظ"))
+return "خداحافظ!";
 
-    input.value="";
-
-    send.disabled=true;
-
-    const loading =
-    document.createElement("div");
-
-    loading.className=
-    "message ai";
-
-    loading.id=
-    "loading";
-
-    loading.textContent=
-    "در حال پاسخ...";
-
-    messages.appendChild(
-        loading
-    );
-
-    messages.scrollTop=
-    messages.scrollHeight;
-
-
-    try{
-
-        const answer =
-        await askRoham(
-            question
-        );
-
-        loading.remove();
-
-        addMessage(
-            answer,
-            "ai"
-        );
-
-    }
-    catch(error){
-
-        loading.remove();
-
-        addMessage(
-            "خطا در دریافت پاسخ.",
-            "ai"
-        );
-
-        console.error(error);
-
-    }
-
-
-    send.disabled=false;
-
-    input.focus();
+return "سؤال شما دریافت شد.\n\nبرای اینکه Roham AI بتواند درباره موضوعات مختلف پاسخ واقعی و آزاد تولید کند، باید به یک سرویس هوش مصنوعی متصل شود. این نسخه بدون API ساخته شده و فقط پاسخ‌های داخلی دارد.";
 }
 
+function send(){
 
-/*
-دکمه ارسال
-*/
+let q=input.value.trim();
 
-send.addEventListener(
-    "click",
-    sendMessage
-);
+if(!q)return;
 
+add(q,"user");
 
-/*
-Enter
-*/
+input.value="";
 
-input.addEventListener(
-    "keydown",
-    function(event){
+setTimeout(()=>{
+add(answer(q),"ai");
+},300);
+}
 
-        if(
-            event.key==="Enter" &&
-            !event.shiftKey
-        ){
+input.addEventListener("keydown",function(e){
 
-            event.preventDefault();
+if(e.key==="Enter" && !e.shiftKey){
+e.preventDefault();
+send();
+}
 
-            sendMessage();
-
-        }
-
-    }
-);
+});
 
 </script>
 
 </body>
 </html>
-```
