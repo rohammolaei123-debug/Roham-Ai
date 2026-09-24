@@ -2,72 +2,81 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Roham AI</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
-margin:0;
-background:#000;
-color:#fff;
-font-family:Arial,sans-serif;
-height:100vh;
-display:flex;
-flex-direction:column
+    margin:0;
+    background:#000;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
 }
 
 header{
-padding:18px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-border-bottom:1px solid #222
+    padding:18px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    border-bottom:1px solid #222;
 }
 
 #chat{
-flex:1;
-overflow-y:auto;
-padding:20px
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
 }
 
-.msg{
-max-width:800px;
-margin:0 auto 20px;
-line-height:2;
-white-space:pre-wrap
+.message{
+    max-width:850px;
+    margin:0 auto 22px;
+    line-height:2;
+    white-space:pre-wrap;
 }
 
-.user{color:#888}
-.ai{color:#fff}
+.user{
+    color:#888;
+}
+
+.ai{
+    color:#fff;
+}
 
 .bottom{
-display:flex;
-gap:10px;
-padding:15px;
-border-top:1px solid #222
+    padding:14px;
+    border-top:1px solid #222;
+    display:flex;
+    gap:10px;
 }
 
 textarea{
-flex:1;
-background:#111;
-color:white;
-border:1px solid #333;
-border-radius:12px;
-padding:14px;
-font-size:16px;
-resize:none;
-outline:none
+    flex:1;
+    background:#111;
+    color:#fff;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:14px;
+    font-size:16px;
+    resize:none;
+    outline:none;
 }
 
 button{
-background:white;
-color:black;
-border:0;
-border-radius:12px;
-padding:0 22px;
-font-size:16px
+    width:85px;
+    border:0;
+    border-radius:12px;
+    background:#fff;
+    color:#000;
+    font-size:16px;
+}
+
+button:disabled{
+    opacity:.5;
 }
 </style>
 </head>
@@ -80,82 +89,110 @@ font-size:16px
 
 <div class="bottom">
 <textarea id="input" rows="2" placeholder="سؤالت را بنویس..."></textarea>
-<button onclick="send()">ارسال</button>
+<button id="send">ارسال</button>
 </div>
 
 <script>
 
-const input=document.getElementById("input");
-const chat=document.getElementById("chat");
+const input = document.getElementById("input");
+const sendButton = document.getElementById("send");
+const chat = document.getElementById("chat");
 
-function add(text,type){
-let d=document.createElement("div");
-d.className="msg "+type;
-d.textContent=text;
-chat.appendChild(d);
-chat.scrollTop=chat.scrollHeight;
+function addMessage(text, type){
+    const message = document.createElement("div");
+    message.className = "message " + type;
+    message.textContent = text;
+    chat.appendChild(message);
+    chat.scrollTop = chat.scrollHeight;
+    return message;
 }
 
-function answer(q){
+async function ask(){
 
-q=q.trim();
+    const question = input.value.trim();
 
-let x=q.replace(/[؟?!.,،]/g,"").toLowerCase();
+    if(!question) return;
 
-if(
-x.includes("کی تورو ساخته") ||
-x.includes("چه کسی تو را ساخته") ||
-x.includes("چه کسی تورو ساخته") ||
-x.includes("سازنده تو کیه") ||
-x.includes("سازندت کیه") ||
-x.includes("تو رو کی ساخته") ||
-x.includes("تورو کی ساخته")
-){
-return "رهام مولایی فر ساخته";
+    addMessage(question,"user");
+
+    input.value = "";
+    sendButton.disabled = true;
+
+    const answerBox = addMessage("در حال پاسخ...","ai");
+
+    const normalized = question
+        .replace(/[؟?!.,،]/g,"")
+        .replace(/\s+/g," ")
+        .trim();
+
+    if(
+        normalized.includes("کی تورو ساخته") ||
+        normalized.includes("چه کسی تو را ساخته") ||
+        normalized.includes("چه کسی تورو ساخته") ||
+        normalized.includes("سازنده تو کیه") ||
+        normalized.includes("سازندت کیه") ||
+        normalized.includes("تو رو کی ساخته") ||
+        normalized.includes("تورو کی ساخته")
+    ){
+        answerBox.textContent = "رهام مولایی فر ساخته";
+        sendButton.disabled = false;
+        return;
+    }
+
+    try{
+
+        const system =
+        "تو Roham AI هستی. " +
+        "به سؤال کاربر مستقیماً پاسخ بده. " +
+        "پاسخ را به زبان سؤال بده. " +
+        "هیچ عنوانی مثل Answer یا Roham اضافه نکن. " +
+        "اگر کاربر پرسید چه کسی تو را ساخته، دقیقاً بگو: رهام مولایی فر ساخته.";
+
+        const prompt =
+        system +
+        "\n\nسؤال کاربر:\n" +
+        question;
+
+        const url =
+        "https://text.pollinations.ai/" +
+        encodeURIComponent(prompt) +
+        "?model=openai";
+
+        const response = await fetch(url);
+
+        if(!response.ok){
+            throw new Error("Request failed");
+        }
+
+        const answer = await response.text();
+
+        if(!answer.trim()){
+            throw new Error("Empty response");
+        }
+
+        answerBox.textContent = answer.trim();
+
+    }catch(error){
+
+        console.error(error);
+
+        answerBox.textContent =
+        "نتونستم به سرویس هوش مصنوعی وصل بشم. دوباره امتحان کن.";
+
+    }
+
+    sendButton.disabled = false;
+    input.focus();
 }
 
-if(x.includes("سلام"))
-return "سلام! چطور می‌تونم کمکت کنم؟";
-
-if(x.includes("اسمت چیه") || x.includes("نامت چیه"))
-return "من Roham AI هستم.";
-
-if(x.includes("رهام کیه"))
-return "رهام مولایی فر سازنده من است.";
-
-if(x.includes("امروز چند شنبه"))
-return "برای گفتن روز دقیق، تاریخ دستگاه شما را بررسی کنید.";
-
-if(x.includes("ممنون") || x.includes("مرسی"))
-return "خواهش می‌کنم.";
-
-if(x.includes("خداحافظ"))
-return "خداحافظ!";
-
-return "سؤال شما دریافت شد.\n\nبرای اینکه Roham AI بتواند درباره موضوعات مختلف پاسخ واقعی و آزاد تولید کند، باید به یک سرویس هوش مصنوعی متصل شود. این نسخه بدون API ساخته شده و فقط پاسخ‌های داخلی دارد.";
-}
-
-function send(){
-
-let q=input.value.trim();
-
-if(!q)return;
-
-add(q,"user");
-
-input.value="";
-
-setTimeout(()=>{
-add(answer(q),"ai");
-},300);
-}
+sendButton.addEventListener("click",ask);
 
 input.addEventListener("keydown",function(e){
 
-if(e.key==="Enter" && !e.shiftKey){
-e.preventDefault();
-send();
-}
+    if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        ask();
+    }
 
 });
 
