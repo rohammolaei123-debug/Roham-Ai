@@ -74,7 +74,9 @@ font-size:16px;
 cursor:pointer
 }
 
-button:disabled{opacity:.5}
+button:disabled{
+opacity:.5
+}
 </style>
 </head>
 
@@ -85,7 +87,12 @@ button:disabled{opacity:.5}
 <div id="chat"></div>
 
 <div class="bottom">
-<textarea id="input" rows="2" placeholder="سؤالت را بنویس..."></textarea>
+<textarea
+id="input"
+rows="2"
+placeholder="سؤالت را بنویس..."
+></textarea>
+
 <button id="send">ارسال</button>
 </div>
 
@@ -97,6 +104,8 @@ const chat = document.getElementById("chat");
 
 const API_URL =
 "https://roham-ai-api.rohammolaei123.workers.dev/";
+
+const messages = [];
 
 function addMessage(text,type){
 
@@ -132,7 +141,9 @@ function creatorQuestion(q){
         "سازنده ات کیه",
         "تو رو کی ساخته",
         "تورو کی ساخته",
-        "تو را چه کسی ساخته"
+        "تو را چه کسی ساخته",
+        "سازنده تو",
+        "خالق تو"
     ];
 
     return words.some(x => q.includes(x));
@@ -152,10 +163,20 @@ async function ask(){
 
     if(creatorQuestion(question)){
 
-        addMessage(
-            "رهام مولایی فر ساخته",
-            "ai"
-        );
+        const creatorAnswer =
+        "من توسط رهام مولایی فر ساخته شدم.";
+
+        addMessage(creatorAnswer,"ai");
+
+        messages.push({
+            role:"user",
+            content:question
+        });
+
+        messages.push({
+            role:"assistant",
+            content:creatorAnswer
+        });
 
         send.disabled = false;
         input.focus();
@@ -170,6 +191,11 @@ async function ask(){
 
     try{
 
+        messages.push({
+            role:"user",
+            content:question
+        });
+
         const response = await fetch(API_URL,{
             method:"POST",
 
@@ -183,16 +209,29 @@ async function ask(){
                     {
                         role:"system",
                         content:
-                        "تو Roham AI هستی. " +
-                        "به سؤال کاربر مستقیم و طبیعی جواب بده. " +
-                        "پاسخ را به زبان سؤال بده. " +
-                        "هیچ عنوان یا توضیح اضافه‌ای قبل از جواب نده. " +
-                        "اگر درباره سازنده‌ات پرسیده شد، بگو: رهام مولایی فر ساخته."
+`تو Roham AI هستی.
+
+مهم‌ترین قانون:
+به سؤال کاربر مستقیم پاسخ بده و سؤال او را دوباره تکرار نکن.
+
+قوانین پاسخ:
+- پاسخ طبیعی و شبیه یک دستیار هوش مصنوعی واقعی باشد.
+- اگر کاربر نظر یا انتخاب خواست، مستقیماً نظر یا انتخابت را بگو و دلیل کوتاه بده.
+- اگر سؤال مقایسه‌ای بود، موارد مهم را مقایسه کن و در پایان جمع‌بندی واضح ارائه بده.
+- اگر کاربر گفت «تو کدام را انتخاب می‌کنی؟»، پاسخ را از دید خودت و مستقیم بیان کن.
+- پاسخ را به زبان خود سؤال بده.
+- از عبارت‌هایی مثل «شما انتخاب می‌کنید؟»، «درست است؟» یا تکرار سؤال کاربر استفاده نکن، مگر اینکه واقعاً برای روشن شدن سؤال لازم باشد.
+- بی‌دلیل سؤال متقابل نپرس.
+- اگر اطلاعات کافی برای پاسخ وجود دارد، مستقیماً جواب بده.
+- پاسخ‌ها واضح، مفید و نسبتاً کوتاه باشند.
+- درباره موضوعات مختلف تا جایی که اطلاعات داری پاسخ بده.
+- اگر چیزی را نمی‌دانی، صادقانه بگو که اطلاعات کافی نداری.
+- اگر سؤال درباره سازنده تو بود، بگو: «من توسط رهام مولایی فر ساخته شدم.»
+`
                     },
-                    {
-                        role:"user",
-                        content:question
-                    }
+
+                    ...messages
+
                 ]
 
             })
@@ -200,23 +239,40 @@ async function ask(){
         });
 
         if(!response.ok){
-            throw new Error("API ERROR");
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
         }
 
         const data = await response.json();
 
         const text =
-            data?.choices?.[0]?.message?.content;
+            data &&
+            data.choices &&
+            data.choices[0] &&
+            data.choices[0].message &&
+            data.choices[0].message.content;
 
         if(!text || !text.trim()){
-            throw new Error("EMPTY");
+
+            throw new Error("EMPTY RESPONSE");
+
         }
 
         answer.textContent = text.trim();
 
+        messages.push({
+            role:"assistant",
+            content:text.trim()
+        });
+
     }catch(error){
 
         console.error(error);
+
+        messages.pop();
 
         answer.textContent =
         "فعلاً اتصال به هوش مصنوعی برقرار نشد. دوباره امتحان کن.";
@@ -236,6 +292,7 @@ input.addEventListener("keydown",function(e){
         e.preventDefault();
 
         ask();
+
     }
 
 });
