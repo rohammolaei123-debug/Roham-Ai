@@ -42,13 +42,8 @@ white-space:pre-wrap;
 word-break:break-word
 }
 
-.user{
-color:#888
-}
-
-.ai{
-color:#fff
-}
+.user{color:#888}
+.ai{color:#fff}
 
 .bottom{
 display:flex;
@@ -79,9 +74,7 @@ font-size:16px;
 cursor:pointer
 }
 
-button:disabled{
-opacity:.5
-}
+button:disabled{opacity:.5}
 </style>
 </head>
 
@@ -92,12 +85,7 @@ opacity:.5
 <div id="chat"></div>
 
 <div class="bottom">
-<textarea
-id="input"
-rows="2"
-placeholder="سؤالت را بنویس..."
-></textarea>
-
+<textarea id="input" rows="2" placeholder="سؤالت را بنویس..."></textarea>
 <button id="send">ارسال</button>
 </div>
 
@@ -106,6 +94,9 @@ placeholder="سؤالت را بنویس..."
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const chat = document.getElementById("chat");
+
+const API_URL =
+"https://roham-ai-api.rohammolaei123.workers.dev/";
 
 function addMessage(text,type){
 
@@ -121,7 +112,6 @@ function addMessage(text,type){
 
     return div;
 }
-
 
 function creatorQuestion(q){
 
@@ -148,7 +138,6 @@ function creatorQuestion(q){
     return words.some(x => q.includes(x));
 }
 
-
 async function ask(){
 
     const question = input.value.trim();
@@ -160,10 +149,6 @@ async function ask(){
     input.value = "";
 
     send.disabled = true;
-
-    /*
-      پاسخ ثابت برای سازنده
-    */
 
     if(creatorQuestion(question)){
 
@@ -185,29 +170,45 @@ async function ask(){
 
     try{
 
-        const prompt =
-        "تو Roham AI هستی. " +
-        "به سؤال کاربر مستقیم جواب بده. " +
-        "پاسخ را به زبان سؤال بده. " +
-        "هیچ عنوان یا توضیح اضافه‌ای قبل از جواب نده. " +
-        "اگر سؤال درباره سازنده تو بود، پاسخ باید «رهام مولایی فر ساخته» باشد." +
-        "\n\nسؤال:\n" +
-        question;
+        const response = await fetch(API_URL,{
+            method:"POST",
 
-        const url =
-        "https://text.pollinations.ai/" +
-        encodeURIComponent(prompt) +
-        "?model=openai";
+            headers:{
+                "Content-Type":"application/json"
+            },
 
-        const response = await fetch(url);
+            body:JSON.stringify({
+
+                messages:[
+                    {
+                        role:"system",
+                        content:
+                        "تو Roham AI هستی. " +
+                        "به سؤال کاربر مستقیم و طبیعی جواب بده. " +
+                        "پاسخ را به زبان سؤال بده. " +
+                        "هیچ عنوان یا توضیح اضافه‌ای قبل از جواب نده. " +
+                        "اگر درباره سازنده‌ات پرسیده شد، بگو: رهام مولایی فر ساخته."
+                    },
+                    {
+                        role:"user",
+                        content:question
+                    }
+                ]
+
+            })
+
+        });
 
         if(!response.ok){
             throw new Error("API ERROR");
         }
 
-        const text = await response.text();
+        const data = await response.json();
 
-        if(!text.trim()){
+        const text =
+            data?.choices?.[0]?.message?.content;
+
+        if(!text || !text.trim()){
             throw new Error("EMPTY");
         }
 
@@ -218,7 +219,7 @@ async function ask(){
         console.error(error);
 
         answer.textContent =
-        "فعلاً اتصال به سرویس هوش مصنوعی برقرار نشد. دوباره امتحان کن.";
+        "فعلاً اتصال به هوش مصنوعی برقرار نشد. دوباره امتحان کن.";
 
     }
 
@@ -226,9 +227,7 @@ async function ask(){
     input.focus();
 }
 
-
 send.addEventListener("click",ask);
-
 
 input.addEventListener("keydown",function(e){
 
