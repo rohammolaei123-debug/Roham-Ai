@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Roham AI</title>
 
 <style>
@@ -11,289 +12,215 @@
     box-sizing: border-box;
 }
 
+html,
 body {
     margin: 0;
-    font-family: Tahoma, Arial, sans-serif;
-    background: #0b1020;
-    color: white;
-}
-
-button,
-input {
-    font-family: inherit;
-}
-
-#loginScreen {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.loginBox {
     width: 100%;
-    max-width: 430px;
-    background: #151c32;
-    padding: 30px;
-    border-radius: 22px;
-    text-align: center;
-    box-shadow: 0 15px 50px rgba(0,0,0,.35);
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+body {
+    overflow: hidden;
+}
+
+.app {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+/* Header */
+
+.header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #1b1b1b;
+    flex-shrink: 0;
 }
 
 .logo {
-    font-size: 38px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.subtitle {
-    color: #aab3ca;
-    margin-bottom: 28px;
-}
-
-.phoneInput {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #303a58;
-    border-radius: 13px;
-    background: #0e1528;
-    color: white;
-    outline: none;
-    font-size: 16px;
-    direction: ltr;
-    text-align: left;
-}
-
-.phoneInput:focus {
-    border-color: #5d7cff;
-}
-
-.mainBtn,
-.laterBtn {
-    width: 100%;
-    padding: 14px;
-    margin-top: 12px;
-    border: none;
-    border-radius: 13px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.mainBtn {
-    background: #5d7cff;
-    color: white;
-}
-
-.mainBtn:hover {
-    background: #4b69e8;
-}
-
-.laterBtn {
-    background: #252e49;
-    color: white;
-}
-
-.laterBtn:hover {
-    background: #303b5c;
-}
-
-.error {
-    color: #ff7b7b;
-    margin-top: 10px;
-    min-height: 20px;
-}
-
-#chatScreen {
-    display: none;
-    height: 100vh;
-    flex-direction: column;
-}
-
-.header {
-    height: 65px;
-    background: #151c32;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 18px;
-    border-bottom: 1px solid #252e49;
-}
-
-.headerTitle {
-    font-size: 20px;
+    color: #fff;
+    font-size: 21px;
     font-weight: bold;
 }
 
-.headerUser {
-    color: #9da8c2;
-    font-size: 13px;
-}
+/* Messages */
 
-#messages {
+.messages {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 25px 15px 30px;
 }
 
 .message {
+    width: 100%;
     max-width: 850px;
-    margin: 0 auto 18px;
+    margin: 0 auto 22px;
 }
 
-.userMessage {
-    background: #263252;
-    padding: 13px 16px;
-    border-radius: 17px 17px 4px 17px;
-    margin-left: 10%;
+.user {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.userBubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: #181818;
+    color: #fff;
+    line-height: 1.8;
     white-space: pre-wrap;
 }
 
-.aiMessage {
-    background: #151c32;
-    border: 1px solid #27304a;
-    padding: 16px;
-    border-radius: 17px 17px 17px 4px;
+.ai {
+    display: block;
 }
 
 .aiText {
-    line-height: 1.9;
+    color: #fff;
+    font-size: 16px;
+    line-height: 2;
     white-space: pre-wrap;
 }
 
-.readBtn {
-    margin-top: 12px;
-    padding: 8px 13px;
-    border: none;
-    border-radius: 9px;
-    background: #252e49;
-    color: white;
-    cursor: pointer;
+/* Loading */
+
+.loading {
+    color: #fff;
+    opacity: .65;
 }
 
-.readBtn:hover {
-    background: #354263;
-}
+/* Input */
 
 .inputArea {
-    padding: 15px;
-    background: #10172a;
-    border-top: 1px solid #252e49;
+    width: 100%;
+    padding: 14px;
+    border-top: 1px solid #1b1b1b;
+    background: #000;
+    flex-shrink: 0;
 }
 
 .inputBox {
     max-width: 850px;
     margin: auto;
     display: flex;
-    gap: 10px;
+    gap: 9px;
 }
 
-.messageInput {
+.input {
     flex: 1;
-    resize: none;
     min-height: 50px;
     max-height: 150px;
-    padding: 14px;
-    border: 1px solid #303a58;
-    border-radius: 14px;
-    background: #151c32;
-    color: white;
+    resize: none;
+
+    background: #111;
+    color: #fff;
+
+    border: 1px solid #292929;
+    border-radius: 15px;
+
+    padding: 13px 15px;
+
     outline: none;
     font-size: 15px;
 }
 
-.sendBtn {
-    width: 60px;
-    border: none;
-    border-radius: 14px;
-    background: #5d7cff;
-    color: white;
+.input::placeholder {
+    color: #777;
+}
+
+.input:focus {
+    border-color: #555;
+}
+
+.send {
+    width: 54px;
+    min-width: 54px;
+    height: 50px;
+
+    border: 0;
+    border-radius: 15px;
+
+    background: #fff;
+    color: #000;
+
+    font-size: 19px;
     cursor: pointer;
-    font-size: 18px;
 }
 
-.sendBtn:hover {
-    background: #4b69e8;
+.send:hover {
+    background: #ddd;
 }
 
-.smallNote {
-    margin-top: 15px;
-    font-size: 12px;
-    color: #7f8aa5;
-    line-height: 1.7;
+.send:disabled {
+    opacity: .5;
+    cursor: default;
 }
 
-.typing {
-    color: #9da8c2;
-    font-size: 14px;
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .header {
+        height: 58px;
+    }
+
+    .messages {
+        padding: 18px 10px 25px;
+    }
+
+    .userBubble {
+        max-width: 88%;
+    }
+
+    .aiText {
+        font-size: 15px;
+    }
+
+    .inputArea {
+        padding: 10px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div id="loginScreen">
+<div class="app">
 
-    <div class="loginBox">
-
+    <header class="header">
         <div class="logo">Roham AI</div>
+    </header>
 
-        <div class="subtitle">
-            برای شروع، شماره تلفنت را وارد کن
-        </div>
-
-        <input
-            id="phoneInput"
-            class="phoneInput"
-            type="tel"
-            placeholder="مثلاً 09123456789"
-            autocomplete="tel"
-        >
-
-        <button class="mainBtn" onclick="loginWithPhone()">
-            وارد کردن شماره و شروع
-        </button>
-
-        <button class="laterBtn" onclick="continueWithoutPhone()">
-            بعداً شماره‌ام را وارد می‌کنم
-        </button>
-
-        <div id="loginError" class="error"></div>
-
-        <div class="smallNote">
-            اگر شماره‌ات را وارد کنی، تاریخچه گفت‌وگوها روی همین مرورگر
-            برایت نگهداری می‌شود.
-        </div>
-
-    </div>
-
-</div>
-
-<div id="chatScreen">
-
-    <div class="header">
-
-        <div>
-            <div class="headerTitle">Roham AI</div>
-            <div id="headerUser" class="headerUser"></div>
-        </div>
-
-    </div>
-
-    <div id="messages"></div>
+    <main
+        id="messages"
+        class="messages"
+    ></main>
 
     <div class="inputArea">
 
         <div class="inputBox">
 
             <textarea
-                id="messageInput"
-                class="messageInput"
-                placeholder="پیامت را برای رهام بنویس..."
-                onkeydown="handleKey(event)"
+                id="input"
+                class="input"
+                placeholder="پیامت را بنویس..."
+                rows="1"
             ></textarea>
 
-            <button class="sendBtn" onclick="sendMessage()">
+            <button
+                id="send"
+                class="send"
+                onclick="sendMessage()"
+            >
                 ➤
             </button>
 
@@ -305,88 +232,159 @@ input {
 
 <script>
 
-let currentPhone = null;
-let memoryEnabled = false;
+/*
+==================================================
+تنظیمات
+==================================================
+*/
 
-function loginWithPhone() {
+const API_URL = "";
 
-    const input = document.getElementById("phoneInput");
-    const error = document.getElementById("loginError");
+/*
+اگر بک‌اند خودت را ساختی، آدرس آن را اینجا قرار بده.
 
-    let phone = input.value.trim();
+مثال:
 
-    phone = phone.replace(/\s+/g, "");
+const API_URL =
+"https://your-server.example/api/chat";
 
-    if (!/^09\d{9}$/.test(phone)) {
+*/
 
-        error.textContent =
-            "لطفاً یک شماره موبایل معتبر وارد کن.";
 
-        return;
+const messages =
+    document.getElementById("messages");
+
+const input =
+    document.getElementById("input");
+
+const sendButton =
+    document.getElementById("send");
+
+
+/*
+==================================================
+پیام کاربر
+==================================================
+*/
+
+function addUserMessage(text) {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "message user";
+
+    const bubble =
+        document.createElement("div");
+
+    bubble.className =
+        "userBubble";
+
+    bubble.textContent =
+        text;
+
+    wrapper.appendChild(bubble);
+
+    messages.appendChild(wrapper);
+
+    scrollBottom();
+}
+
+
+/*
+==================================================
+پیام رهام
+==================================================
+*/
+
+function addAIMessage(text) {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "message ai";
+
+    const answer =
+        document.createElement("div");
+
+    answer.className =
+        "aiText";
+
+    /*
+    فقط خود جواب نمایش داده می‌شود.
+    هیچ عبارت اضافه‌ای مثل:
+    "رهام:"
+    "پاسخ:"
+    یا متن اضافی اضافه نمی‌شود.
+    */
+
+    answer.textContent =
+        text;
+
+    wrapper.appendChild(answer);
+
+    messages.appendChild(wrapper);
+
+    scrollBottom();
+}
+
+
+/*
+==================================================
+پیام در حال پاسخ
+==================================================
+*/
+
+function addLoading() {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.id =
+        "loading";
+
+    wrapper.className =
+        "message ai";
+
+    const text =
+        document.createElement("div");
+
+    text.className =
+        "aiText loading";
+
+    text.textContent =
+        "در حال پاسخ...";
+
+    wrapper.appendChild(text);
+
+    messages.appendChild(wrapper);
+
+    scrollBottom();
+}
+
+
+function removeLoading() {
+
+    const loading =
+        document.getElementById("loading");
+
+    if (loading) {
+
+        loading.remove();
+
     }
-
-    currentPhone = phone;
-    memoryEnabled = true;
-
-    localStorage.setItem(
-        "roham_current_phone",
-        phone
-    );
-
-    openChat();
 }
 
-function continueWithoutPhone() {
 
-    currentPhone = null;
-    memoryEnabled = false;
+/*
+==================================================
+ارسال سؤال
+==================================================
+*/
 
-    openChat();
-}
-
-function openChat() {
-
-    document.getElementById("loginScreen").style.display =
-        "none";
-
-    document.getElementById("chatScreen").style.display =
-        "flex";
-
-    const headerUser =
-        document.getElementById("headerUser");
-
-    if (memoryEnabled) {
-
-        headerUser.textContent =
-            "حافظه فعال • " + currentPhone;
-
-    } else {
-
-        headerUser.textContent =
-            "حالت بدون حافظه";
-
-    }
-
-    loadHistory();
-}
-
-function handleKey(event) {
-
-    if (
-        event.key === "Enter" &&
-        !event.shiftKey
-    ) {
-
-        event.preventDefault();
-
-        sendMessage();
-    }
-}
-
-function sendMessage() {
-
-    const input =
-        document.getElementById("messageInput");
+async function sendMessage() {
 
     const text =
         input.value.trim();
@@ -397,286 +395,190 @@ function sendMessage() {
 
     input.value = "";
 
-    showTyping();
+    input.style.height = "auto";
 
-    setTimeout(() => {
+    sendButton.disabled = true;
 
-        removeTyping();
+    addLoading();
 
-        const answer =
-            "سلام! من رهام هستم.\n\n" +
-            "پیامت را دریافت کردم. این بخش آماده است تا به هوش مصنوعی واقعی متصل شود.";
 
-        addAIMessage(answer);
+    /*
+    پاسخ مخصوص سازنده
+    */
 
-    }, 700);
-}
+    const normalized =
+        text
+        .toLowerCase()
+        .replaceAll("ي", "ی")
+        .replaceAll("ك", "ک");
 
-function addUserMessage(text, save = true) {
 
-    const container =
-        document.getElementById("messages");
+    if (
+        normalized.includes("کی تورو ساخته") ||
+        normalized.includes("چه کسی تورو ساخته") ||
+        normalized.includes("چه کسی تو را ساخته") ||
+        normalized.includes("سازنده تو کیه") ||
+        normalized.includes("سازنده شما کیست") ||
+        normalized.includes("سازنده ات کیه") ||
+        normalized.includes("سازنده‌ات کیه")
+    ) {
 
-    const wrapper =
-        document.createElement("div");
+        removeLoading();
 
-    wrapper.className = "message";
-
-    wrapper.innerHTML = `
-        <div class="userMessage"></div>
-    `;
-
-    wrapper.querySelector(".userMessage").textContent =
-        text;
-
-    container.appendChild(wrapper);
-
-    scrollToBottom();
-
-    if (save && memoryEnabled) {
-
-        saveMessage("user", text);
-    }
-}
-
-function addAIMessage(text, save = true) {
-
-    const container =
-        document.getElementById("messages");
-
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.className = "message";
-
-    wrapper.innerHTML = `
-        <div class="aiMessage">
-
-            <div class="aiText"></div>
-
-            <button class="readBtn">
-                خواندن متن
-            </button>
-
-        </div>
-    `;
-
-    const textElement =
-        wrapper.querySelector(".aiText");
-
-    const readButton =
-        wrapper.querySelector(".readBtn");
-
-    textElement.textContent = text;
-
-    readButton.onclick = function () {
-
-        readText(text, readButton);
-
-    };
-
-    container.appendChild(wrapper);
-
-    scrollToBottom();
-
-    if (save && memoryEnabled) {
-
-        saveMessage("ai", text);
-    }
-}
-
-function readText(text, button) {
-
-    if (!("speechSynthesis" in window)) {
-
-        alert(
-            "مرورگر شما از خواندن متن پشتیبانی نمی‌کند."
+        addAIMessage(
+            "رهام مولایی فر"
         );
+
+        sendButton.disabled = false;
 
         return;
     }
 
-    speechSynthesis.cancel();
 
-    const utterance =
-        new SpeechSynthesisUtterance(text);
+    /*
+    اگر API تنظیم نشده باشد
+    */
 
-    utterance.lang = "fa-IR";
+    if (!API_URL) {
 
-    utterance.rate = 0.95;
+        removeLoading();
 
-    utterance.pitch = 1;
-
-    button.textContent =
-        "توقف خواندن";
-
-    utterance.onend = function () {
-
-        button.textContent =
-            "خواندن متن";
-    };
-
-    utterance.onerror = function () {
-
-        button.textContent =
-            "خواندن متن";
-    };
-
-    button.onclick = function () {
-
-        speechSynthesis.cancel();
-
-        button.textContent =
-            "خواندن متن";
-
-        button.onclick = function () {
-
-            readText(text, button);
-
-        };
-    };
-
-    speechSynthesis.speak(utterance);
-}
-
-function saveMessage(role, text) {
-
-    if (
-        !memoryEnabled ||
-        !currentPhone
-    ) return;
-
-    const key =
-        "roham_history_" + currentPhone;
-
-    let history =
-        JSON.parse(
-            localStorage.getItem(key) || "[]"
+        addAIMessage(
+            "برای پاسخ‌گویی واقعی، اتصال هوش مصنوعی باید در بخش API تنظیم شود."
         );
 
-    history.push({
+        sendButton.disabled = false;
 
-        role: role,
-        text: text,
-        time: Date.now()
-
-    });
-
-    localStorage.setItem(
-        key,
-        JSON.stringify(history)
-    );
-}
-
-function loadHistory() {
-
-    const container =
-        document.getElementById("messages");
-
-    container.innerHTML = "";
-
-    if (
-        !memoryEnabled ||
-        !currentPhone
-    ) return;
-
-    const key =
-        "roham_history_" + currentPhone;
-
-    const history =
-        JSON.parse(
-            localStorage.getItem(key) || "[]"
-        );
-
-    history.forEach(message => {
-
-        if (message.role === "user") {
-
-            addUserMessage(
-                message.text,
-                false
-            );
-        }
-
-        if (message.role === "ai") {
-
-            addAIMessage(
-                message.text,
-                false
-            );
-        }
-
-    });
-}
-
-function showTyping() {
-
-    const container =
-        document.getElementById("messages");
-
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.id =
-        "typingMessage";
-
-    wrapper.className =
-        "message";
-
-    wrapper.innerHTML = `
-        <div class="aiMessage">
-            <div class="typing">
-                رهام در حال پاسخ دادن است...
-            </div>
-        </div>
-    `;
-
-    container.appendChild(wrapper);
-
-    scrollToBottom();
-}
-
-function removeTyping() {
-
-    const typing =
-        document.getElementById(
-            "typingMessage"
-        );
-
-    if (typing) {
-
-        typing.remove();
+        return;
     }
-}
 
-function scrollToBottom() {
 
-    const container =
-        document.getElementById("messages");
+    /*
+    اتصال به بک‌اند واقعی
+    */
 
-    container.scrollTop =
-        container.scrollHeight;
-}
+    try {
 
-window.addEventListener(
-    "load",
-    function () {
+        const response =
+            await fetch(API_URL, {
 
-        const savedPhone =
-            localStorage.getItem(
-                "roham_current_phone"
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    message: text
+
+                })
+
+            });
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API Error"
             );
 
-        if (savedPhone) {
+        }
 
-            document.getElementById(
-                "phoneInput"
-            ).value = savedPhone;
+
+        const data =
+            await response.json();
+
+
+        removeLoading();
+
+
+        /*
+        فقط answer نمایش داده می‌شود.
+        */
+
+        addAIMessage(
+            data.answer || "پاسخی دریافت نشد."
+        );
+
+
+    } catch (error) {
+
+        removeLoading();
+
+        addAIMessage(
+            "ارتباط با هوش مصنوعی برقرار نشد."
+        );
+
+    }
+
+
+    sendButton.disabled = false;
+
+}
+
+
+/*
+==================================================
+Enter
+==================================================
+*/
+
+input.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
 
         }
 
     }
 );
+
+
+/*
+==================================================
+افزایش خودکار ارتفاع کادر
+==================================================
+*/
+
+input.addEventListener(
+    "input",
+    function() {
+
+        this.style.height =
+            "auto";
+
+        this.style.height =
+            Math.min(
+                this.scrollHeight,
+                150
+            ) + "px";
+
+    }
+);
+
+
+/*
+==================================================
+اسکرول
+==================================================
+*/
+
+function scrollBottom() {
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+}
 
 </script>
 
