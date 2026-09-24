@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Roham AI</title>
 
 <style>
@@ -19,7 +19,7 @@ flex-direction:column
 }
 
 header{
-height:65px;
+height:64px;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -36,10 +36,10 @@ padding:20px
 
 .message{
 max-width:850px;
-margin:0 auto 22px;
+margin:0 auto 20px;
 line-height:2;
 white-space:pre-wrap;
-word-wrap:break-word
+word-break:break-word
 }
 
 .user{
@@ -50,16 +50,11 @@ color:#888
 color:#fff
 }
 
-.loading{
-color:#777
-}
-
 .bottom{
-padding:14px;
-border-top:1px solid #222;
 display:flex;
 gap:10px;
-background:#000
+padding:14px;
+border-top:1px solid #222
 }
 
 textarea{
@@ -68,18 +63,14 @@ background:#111;
 color:#fff;
 border:1px solid #333;
 border-radius:12px;
-padding:14px;
+padding:13px;
 font-size:16px;
-outline:none;
-resize:none
-}
-
-textarea:focus{
-border-color:#666
+resize:none;
+outline:none
 }
 
 button{
-width:90px;
+width:85px;
 border:0;
 border-radius:12px;
 background:#fff;
@@ -132,29 +123,33 @@ function addMessage(text,type){
 }
 
 
-function isCreatorQuestion(text){
+function creatorQuestion(q){
 
-    const q = text
-        .replace(/[؟?!.,،]/g,"")
-        .replace(/\s+/g," ")
-        .trim()
-        .toLowerCase();
+    q = q
+    .replace(/[؟?!.,،]/g,"")
+    .replace(/\s+/g," ")
+    .trim()
+    .toLowerCase();
 
-    return (
-        q.includes("کی تورو ساخته") ||
-        q.includes("چه کسی تو را ساخته") ||
-        q.includes("چه کسی تورو ساخته") ||
-        q.includes("چه کسی تو رو ساخته") ||
-        q.includes("سازنده تو کیه") ||
-        q.includes("سازندت کیه") ||
-        q.includes("تو رو کی ساخته") ||
-        q.includes("تورو کی ساخته") ||
-        q.includes("سازنده کیه")
-    );
+    const words = [
+        "کی تورو ساخته",
+        "کی تو رو ساخته",
+        "چه کسی تو را ساخته",
+        "چه کسی تورو ساخته",
+        "چه کسی تو رو ساخته",
+        "سازنده تو کیه",
+        "سازندت کیه",
+        "سازنده ات کیه",
+        "تو رو کی ساخته",
+        "تورو کی ساخته",
+        "تو را چه کسی ساخته"
+    ];
+
+    return words.some(x => q.includes(x));
 }
 
 
-async function askAI(){
+async function ask(){
 
     const question = input.value.trim();
 
@@ -166,91 +161,82 @@ async function askAI(){
 
     send.disabled = true;
 
-    if(isCreatorQuestion(question)){
+    /*
+      پاسخ ثابت برای سازنده
+    */
 
-        addMessage("رهام مولایی فر ساخته","ai");
+    if(creatorQuestion(question)){
+
+        addMessage(
+            "رهام مولایی فر ساخته",
+            "ai"
+        );
 
         send.disabled = false;
-
         input.focus();
 
         return;
     }
 
-    const answerBox = addMessage(
+    const answer = addMessage(
         "در حال پاسخ...",
-        "ai loading"
+        "ai"
     );
 
     try{
 
-        const systemPrompt =
+        const prompt =
         "تو Roham AI هستی. " +
-        "به سؤال کاربر مستقیم و واضح جواب بده. " +
-        "پاسخ را به زبان سؤال کاربر بده. " +
-        "هیچ عبارت اضافی مثل Answer، Roham یا پاسخ اضافه نکن. " +
-        "اگر سؤال درباره سازنده تو بود، بگو: رهام مولایی فر ساخته.";
-
-        const fullPrompt =
-        systemPrompt +
-        "\n\nسؤال کاربر:\n" +
+        "به سؤال کاربر مستقیم جواب بده. " +
+        "پاسخ را به زبان سؤال بده. " +
+        "هیچ عنوان یا توضیح اضافه‌ای قبل از جواب نده. " +
+        "اگر سؤال درباره سازنده تو بود، پاسخ باید «رهام مولایی فر ساخته» باشد." +
+        "\n\nسؤال:\n" +
         question;
 
         const url =
         "https://text.pollinations.ai/" +
-        encodeURIComponent(fullPrompt) +
+        encodeURIComponent(prompt) +
         "?model=openai";
 
         const response = await fetch(url);
 
         if(!response.ok){
-
-            throw new Error(
-                "HTTP " + response.status
-            );
-
+            throw new Error("API ERROR");
         }
 
-        const answer = await response.text();
+        const text = await response.text();
 
-        if(!answer || !answer.trim()){
-
-            throw new Error("EMPTY_RESPONSE");
-
+        if(!text.trim()){
+            throw new Error("EMPTY");
         }
 
-        answerBox.className = "message ai";
-
-        answerBox.textContent = answer.trim();
+        answer.textContent = text.trim();
 
     }catch(error){
 
         console.error(error);
 
-        answerBox.className = "message ai";
-
-        answerBox.textContent =
-        "فعلاً نتونستم به سرویس هوش مصنوعی وصل بشم. دوباره امتحان کن.";
+        answer.textContent =
+        "فعلاً اتصال به سرویس هوش مصنوعی برقرار نشد. دوباره امتحان کن.";
 
     }
 
     send.disabled = false;
-
     input.focus();
 }
 
 
-send.addEventListener("click",askAI);
+send.addEventListener("click",ask);
 
 
-input.addEventListener("keydown",function(event){
+input.addEventListener("keydown",function(e){
 
-    if(event.key === "Enter" && !event.shiftKey){
+    if(e.key === "Enter" && !e.shiftKey){
 
-        event.preventDefault();
+        e.preventDefault();
 
-        askAI();
-
+        ask();
     }
 
 });
