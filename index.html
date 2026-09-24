@@ -2,81 +2,94 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roham AI</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
-    margin:0;
-    background:#000;
-    color:#fff;
-    font-family:Arial,sans-serif;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
+margin:0;
+background:#000;
+color:#fff;
+font-family:Arial,sans-serif;
+height:100vh;
+display:flex;
+flex-direction:column
 }
 
 header{
-    padding:18px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
-    border-bottom:1px solid #222;
+height:65px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-bottom:1px solid #222;
+font-size:22px;
+font-weight:bold
 }
 
 #chat{
-    flex:1;
-    overflow-y:auto;
-    padding:20px;
+flex:1;
+overflow-y:auto;
+padding:20px
 }
 
 .message{
-    max-width:850px;
-    margin:0 auto 22px;
-    line-height:2;
-    white-space:pre-wrap;
+max-width:850px;
+margin:0 auto 22px;
+line-height:2;
+white-space:pre-wrap;
+word-wrap:break-word
 }
 
 .user{
-    color:#888;
+color:#888
 }
 
 .ai{
-    color:#fff;
+color:#fff
+}
+
+.loading{
+color:#777
 }
 
 .bottom{
-    padding:14px;
-    border-top:1px solid #222;
-    display:flex;
-    gap:10px;
+padding:14px;
+border-top:1px solid #222;
+display:flex;
+gap:10px;
+background:#000
 }
 
 textarea{
-    flex:1;
-    background:#111;
-    color:#fff;
-    border:1px solid #333;
-    border-radius:12px;
-    padding:14px;
-    font-size:16px;
-    resize:none;
-    outline:none;
+flex:1;
+background:#111;
+color:#fff;
+border:1px solid #333;
+border-radius:12px;
+padding:14px;
+font-size:16px;
+outline:none;
+resize:none
+}
+
+textarea:focus{
+border-color:#666
 }
 
 button{
-    width:85px;
-    border:0;
-    border-radius:12px;
-    background:#fff;
-    color:#000;
-    font-size:16px;
+width:90px;
+border:0;
+border-radius:12px;
+background:#fff;
+color:#000;
+font-size:16px;
+cursor:pointer
 }
 
 button:disabled{
-    opacity:.5;
+opacity:.5
 }
 </style>
 </head>
@@ -88,26 +101,60 @@ button:disabled{
 <div id="chat"></div>
 
 <div class="bottom">
-<textarea id="input" rows="2" placeholder="سؤالت را بنویس..."></textarea>
+<textarea
+id="input"
+rows="2"
+placeholder="سؤالت را بنویس..."
+></textarea>
+
 <button id="send">ارسال</button>
 </div>
 
 <script>
 
 const input = document.getElementById("input");
-const sendButton = document.getElementById("send");
+const send = document.getElementById("send");
 const chat = document.getElementById("chat");
 
-function addMessage(text, type){
-    const message = document.createElement("div");
-    message.className = "message " + type;
-    message.textContent = text;
-    chat.appendChild(message);
+function addMessage(text,type){
+
+    const div = document.createElement("div");
+
+    div.className = "message " + type;
+
+    div.textContent = text;
+
+    chat.appendChild(div);
+
     chat.scrollTop = chat.scrollHeight;
-    return message;
+
+    return div;
 }
 
-async function ask(){
+
+function isCreatorQuestion(text){
+
+    const q = text
+        .replace(/[؟?!.,،]/g,"")
+        .replace(/\s+/g," ")
+        .trim()
+        .toLowerCase();
+
+    return (
+        q.includes("کی تورو ساخته") ||
+        q.includes("چه کسی تو را ساخته") ||
+        q.includes("چه کسی تورو ساخته") ||
+        q.includes("چه کسی تو رو ساخته") ||
+        q.includes("سازنده تو کیه") ||
+        q.includes("سازندت کیه") ||
+        q.includes("تو رو کی ساخته") ||
+        q.includes("تورو کی ساخته") ||
+        q.includes("سازنده کیه")
+    );
+}
+
+
+async function askAI(){
 
     const question = input.value.trim();
 
@@ -116,59 +163,63 @@ async function ask(){
     addMessage(question,"user");
 
     input.value = "";
-    sendButton.disabled = true;
 
-    const answerBox = addMessage("در حال پاسخ...","ai");
+    send.disabled = true;
 
-    const normalized = question
-        .replace(/[؟?!.,،]/g,"")
-        .replace(/\s+/g," ")
-        .trim();
+    if(isCreatorQuestion(question)){
 
-    if(
-        normalized.includes("کی تورو ساخته") ||
-        normalized.includes("چه کسی تو را ساخته") ||
-        normalized.includes("چه کسی تورو ساخته") ||
-        normalized.includes("سازنده تو کیه") ||
-        normalized.includes("سازندت کیه") ||
-        normalized.includes("تو رو کی ساخته") ||
-        normalized.includes("تورو کی ساخته")
-    ){
-        answerBox.textContent = "رهام مولایی فر ساخته";
-        sendButton.disabled = false;
+        addMessage("رهام مولایی فر ساخته","ai");
+
+        send.disabled = false;
+
+        input.focus();
+
         return;
     }
 
+    const answerBox = addMessage(
+        "در حال پاسخ...",
+        "ai loading"
+    );
+
     try{
 
-        const system =
+        const systemPrompt =
         "تو Roham AI هستی. " +
-        "به سؤال کاربر مستقیماً پاسخ بده. " +
-        "پاسخ را به زبان سؤال بده. " +
-        "هیچ عنوانی مثل Answer یا Roham اضافه نکن. " +
-        "اگر کاربر پرسید چه کسی تو را ساخته، دقیقاً بگو: رهام مولایی فر ساخته.";
+        "به سؤال کاربر مستقیم و واضح جواب بده. " +
+        "پاسخ را به زبان سؤال کاربر بده. " +
+        "هیچ عبارت اضافی مثل Answer، Roham یا پاسخ اضافه نکن. " +
+        "اگر سؤال درباره سازنده تو بود، بگو: رهام مولایی فر ساخته.";
 
-        const prompt =
-        system +
+        const fullPrompt =
+        systemPrompt +
         "\n\nسؤال کاربر:\n" +
         question;
 
         const url =
         "https://text.pollinations.ai/" +
-        encodeURIComponent(prompt) +
+        encodeURIComponent(fullPrompt) +
         "?model=openai";
 
         const response = await fetch(url);
 
         if(!response.ok){
-            throw new Error("Request failed");
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
         }
 
         const answer = await response.text();
 
-        if(!answer.trim()){
-            throw new Error("Empty response");
+        if(!answer || !answer.trim()){
+
+            throw new Error("EMPTY_RESPONSE");
+
         }
+
+        answerBox.className = "message ai";
 
         answerBox.textContent = answer.trim();
 
@@ -176,22 +227,30 @@ async function ask(){
 
         console.error(error);
 
+        answerBox.className = "message ai";
+
         answerBox.textContent =
-        "نتونستم به سرویس هوش مصنوعی وصل بشم. دوباره امتحان کن.";
+        "فعلاً نتونستم به سرویس هوش مصنوعی وصل بشم. دوباره امتحان کن.";
 
     }
 
-    sendButton.disabled = false;
+    send.disabled = false;
+
     input.focus();
 }
 
-sendButton.addEventListener("click",ask);
 
-input.addEventListener("keydown",function(e){
+send.addEventListener("click",askAI);
 
-    if(e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        ask();
+
+input.addEventListener("keydown",function(event){
+
+    if(event.key === "Enter" && !event.shiftKey){
+
+        event.preventDefault();
+
+        askAI();
+
     }
 
 });
